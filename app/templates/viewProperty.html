@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+        <div class="card mb-3" style="margin: 0% 20%">
+            <div class="row g-0">
+                <div class="col-md-5">
+                    <img src="{{ url_for('static', filename=upload_folder+'/'+find_property.photo_filename) }}"
+                         class="img-fluid rounded-start" alt="Image of Property"
+                            style="width:100%;height:100%;">
+                </div>
+                <div class="col-md-7 ps-3">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ find_property.title }}</h4>
+                        <ul class="d-flex list-unstyled gap-2">
+                            <li class="single_view_price">${{ "{:,.0f}".format(find_property.price) }}</li>
+                            <li class="single_view_type">{{ find_property.type }}</li>
+                        </ul>
+                        <p class="card-text">{{ find_property.description }}</p>
+                        <ul class="d-flex list-unstyled gap-2 align-items-center">
+                            <li>
+                                <span class="material-symbols-outlined">bed</span>
+                                {{ find_property.bedrooms }}
+                                Bedrooms
+                            </li>
+                            <li>
+                                <span class="material-symbols-outlined">
+                                    shower
+                                </span>
+                                {{ find_property.bathrooms }}
+                                Bathrooms
+                            </li>
+                        </ul>
+                        <p class="card-text">
+                            <small class="text-body-secondary">
+                                <span class="material-symbols-outlined">
+                                    location_on
+                                </span>
+                                {{ find_property.location}}
+                            </small>
+                        </p>
+                        <button class="btn theme-colour">Email Realtor</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}

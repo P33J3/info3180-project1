@@ -1,3 +1,24 @@
 body {
     padding-top: 5rem;
 }
+
+.single_view_price {
+    color: white;
+    background-color: #5FA5FA;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.single_view_type {
+    color: white;
+    background-color: #FCC541;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.theme-colour {
+    color: white;
+    background-color: #14BCA4;
+}

@@ -5,8 +5,12 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file contains the routes for your application.
 """
 
-from app import app
-from flask import render_template, request, redirect, url_for
+import os
+from app import app, db
+from flask import render_template, request, redirect, url_for, flash, send_from_directory
+from werkzeug.utils import secure_filename
+from app.models import Property
+from app.forms import PropertyForm
 
 
 ###
@@ -25,9 +29,72 @@ def about():
     return render_template('about.html', name="Mary Jane")
 
 
+@app.route('/properties/create', methods=['POST', 'GET'])
+def create():
+    form = PropertyForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            title = form.title.data
+            bedrooms = form.bedrooms.data
+            bathrooms = form.bathrooms.data
+            location = form.location.data
+            price = form.price.data
+            property_type = form.type.data
+            description = form.description.data
+            photo = form.photo.data
+
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(app.static_folder, app.config['UPLOAD_FOLDER'], filename))
+
+            created_property = Property(title, bedrooms, bathrooms, location, price,
+                                        property_type, description, filename)
+            db.session.add(created_property)
+            db.session.commit()
+
+            flash('Property Added', 'success')
+            return redirect(url_for('view_all'))
+        flash_errors(form)
+
+    return render_template('createProperty.html', form=form)
+
+
+@app.route('/properties')
+def view_all():
+    image_uploads = get_photo_listing()
+    upload_folder = app.config['UPLOAD_FOLDER']
+    properties = db.session.execute(db.select(Property)).scalars()
+
+    return render_template('viewProperties.html',
+                           image_uploads=image_uploads,
+                           properties=properties,
+                           upload_folder=upload_folder
+                           )
+
+@app.route('/properties/<propertyid>')
+def view_property(propertyid):
+    find_property = db.get_or_404(Property, propertyid)
+    upload_folder = app.config['UPLOAD_FOLDER']
+
+    return render_template('viewProperty.html', find_property=find_property, upload_folder=upload_folder)
+
 ###
 # The functions below should be applicable to all Flask apps.
 ###
+
+def get_photo_listing():
+    rootdir = os.getcwd()
+    uploads_folder = app.config['UPLOAD_FOLDER']
+    uploads_path = os.path.join(rootdir, uploads_folder)
+    image_uploads = []
+
+    if os.path.exists(uploads_path) and os.path.isdir(uploads_path):
+        for subdir, dirs, files in os.walk(uploads_path):
+            for file in files:
+                image_uploads.append(os.path.join(subdir, file))
+
+    return image_uploads
+
 
 # Display Flask WTF errors as Flash messages
 def flash_errors(form):
@@ -37,6 +104,7 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
             ), 'danger')
+
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):
